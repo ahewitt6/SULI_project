@@ -689,121 +689,38 @@ def return_cluster_size(new_vector_list,average_positions):     #returns size of
 def av_sij_num_clusters(vectorlist,dimension,number_clusters_max):
     maxnum=number_clusters_max
     v=vectorlist
-    #maxnum=30
-    #dimension=3
-    av_Sij=[]; nlist=[]; Vitot=[]; Dijtot=[]; sumsijtot=[]; Sijtot=[]; nanstot=[]; Sijdtot=[]
-    for n in range(12,maxnum):
+    av_Sij=[]; nlist=[]
+    for n in range(2,maxnum):
         print('number of clusters: ',n)
         nlist.append(n)
-        '''kneigh=find_k(v,dimension,n)
-        D,I=IndexIVFFlat(v,dimension,n,kneigh)
-        I=remove_value(I,-1)
-        D=remove_value(D,3.4028234663852886e+38)
-        D,I=remove_duplicates(I,D,nlist)'''    #removes duplicate lists in I, and corresponding lists in D
-        kneigh=find_k(v,dimension,n)
+        kneigh=len(vectorlist)
         vec_new,centers,numstrs=faiss_return_n_clusters(v,n,kneigh)
-        #centers=return_n_centers(vec_new,len(v[0]))
         Dij=[]
         for i in range(len(centers)):
             Dijrow=[]
             for j in range(len(centers)):
-                    Dijtemp=np.linalg.norm(centers[i]-centers[j])
-                    Dijrow.append(Dijtemp)
+                Dijtemp=np.linalg.norm(centers[i]-centers[j])
+                Dijrow.append(Dijtemp)
             Dij.append(Dijrow)
-        Dijtot.append(Dij)
-
-        #Sij= Dij/sqrt(Vi + Vj) i,j refers to cluster index, V=Sum(Dic^2), Dic is distance from center of cluster to a star in that cluster
-        #lets calculate Vi for each cluster
-        Vi=[]
+        
+        Vi=[]; sumdij=[]
         for n in range(len(centers)):
             Dic=[]
             for j in range(len(vec_new[n])):
                 Dictemp=np.linalg.norm(vec_new[n][j]-centers[n])
                 Dic.append(Dictemp)
-            V=sum(np.array(Dic)**2)
+            V=sum(np.array(Dic)**2)/len(Dic)
             Vi.append(V)
-        Vitot.append(Vi)
+            sumdijtemp=sum(Dic)
+            sumdij.append(sumdijtemp)
 
-        Sij=[]; nans=[]
-        for i in range(len(Vi)):
-            Sijrow=[]
-            for j in range(i+1,len(Vi)):
-                Sijtemp=Dij[i][j]/np.sqrt(Vi[i]+Vi[j])
-                #Sijrow.append(Sijtemp)
-                Sij.append(Dij[i][j]/np.sqrt(Vi[i]+Vi[j]))
-                if np.isnan(Sijtemp):
-                    nans.append([i,j])
-            #Sij.append(Sijrow)
-        Sijd=Sij
-        Sij=np.array(Sij).flatten()
-        Sijtot.append(Sij)
-        av_Sij.append((sum(Sij)/(len(Vi)**2-len(Vi)))/2)
-        sumsijtot.append(sum(Sij))
-        Sijdtot.append(Sijd)
-        nanstot.append(nans)
-    return(av_Sij,nlist,Vitot,Dijtot,sumsijtot,Sijtot,nanstot,Sijdtot)
-    
-
-
-
-
-
-    
-    
-    
-def av_sij_num_clusters(vectorlist,dimension,number_clusters_max):
-    maxnum=number_clusters_max
-    v=vectorlist
-    #maxnum=30
-    #dimension=3
-    av_Sij=[]; nlist=[]; Vitot=[]; Dijtot=[]; sumsijtot=[]; Sijtot=[]; nanstot=[]; Sijdtot=[]
-    for n in range(12,maxnum):
-        print('number of clusters: ',n)
-        nlist.append(n)
-        '''kneigh=find_k(v,dimension,n)
-        D,I=IndexIVFFlat(v,dimension,n,kneigh)
-        I=remove_value(I,-1)
-        D=remove_value(D,3.4028234663852886e+38)
-        D,I=remove_duplicates(I,D,nlist)'''    #removes duplicate lists in I, and corresponding lists in D
-        kneigh=find_k(v,dimension,n)
-        vec_new,centers,numstrs=faiss_return_n_clusters(v,n,kneigh)
-        #centers=return_n_centers(vec_new,len(v[0]))
-        Dij=[]
+        Sij=[]; vartot=[]
         for i in range(len(centers)):
-            Dijrow=[]
             for j in range(len(centers)):
-                    Dijtemp=np.linalg.norm(centers[i]-centers[j])
-                    Dijrow.append(Dijtemp)
-            Dij.append(Dijrow)
-        Dijtot.append(Dij)
-
-        #Sij= Dij/sqrt(Vi + Vj) i,j refers to cluster index, V=Sum(Dic^2), Dic is distance from center of cluster to a star in that cluster
-        #lets calculate Vi for each cluster
-        Vi=[]
-        for n in range(len(centers)):
-            Dic=[]
-            for j in range(len(vec_new[n])):
-                Dictemp=np.linalg.norm(vec_new[n][j]-centers[n])
-                Dic.append(Dictemp)
-            V=sum(np.array(Dic)**2)
-            Vi.append(V)
-        Vitot.append(Vi)
-
-        Sij=[]; nans=[]
-        for i in range(len(Vi)-1):
-            Sijrow=[]
-            for j in range(i+1,len(Vi)):
-                Sijtemp=Dij[i][j]/np.sqrt(Vi[i]+Vi[j])
-                #Sijrow.append(Sijtemp)
-                Sij.append(Dij[i][j]/np.sqrt(Vi[i]+Vi[j]))
-                if np.isnan(Sijtemp):
-                    nans.append([i,j])
-            #Sij.append(Sijrow)
-        Sijd=Sij
-        Sij=np.array(Sij).flatten()
-        Sijtot.append(Sij)
-        av_Sij.append((sum(Sij)/((len(Vi)**2-len(Vi))/2))/2)
-        sumsijtot.append(sum(Sij))
-        Sijdtot.append(Sijd)
-        nanstot.append(nans)
-    return(av_Sij,nlist,Vitot,Dijtot,sumsijtot,Sijtot,nanstot,Sijdtot)
+                if i !=j:
+                    Sijtemp=Dij[i][j]/np.sqrt(Vi[i]+Vi[j])
+                    vartot.append(np.sqrt(Vi[i]+Vi[j]))
+                    Sij.append(Sijtemp)
+        av_sijtemp=sum(Sij)/(len(Sij))
+        av_Sij.append(av_sijtemp)
+    return(av_Sij,nlist)
